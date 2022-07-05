@@ -21,6 +21,18 @@ function verifyIfExitsAccountCPF(req, res, next) {
   return next()
 }
 
+function getBalance(statement) {
+ const balance = statement.reduce((acc, operation) => {
+    if (operation.type === 'credit') {
+      return acc + operation.amount
+    } else {
+      return acc - operation.amount
+    }
+  })
+
+  return balance
+}
+
 app.post('/account', (req, res) => {
   const { cpf, name} = req.body
 
@@ -59,6 +71,11 @@ app.post('/deposit', verifyIfExitsAccountCPF, (req, res) => {
   customer.statement.push(statementOperation)
 
   return res.status(201).send()
+})
+
+app.get('/withdraw', verifyIfExitsAccountCPF, (req, res) => {
+  const { amount } = req.body
+  const { customer } = req
 })
 
 app.listen(3000)
