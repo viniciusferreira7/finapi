@@ -28,7 +28,7 @@ function getBalance(statement) {
     } else {
       return acc - operation.amount
     }
-  })
+  }, 0)
 
   return balance
 }
@@ -73,9 +73,25 @@ app.post('/deposit', verifyIfExitsAccountCPF, (req, res) => {
   return res.status(201).send()
 })
 
-app.get('/withdraw', verifyIfExitsAccountCPF, (req, res) => {
+app.post('/withdraw', verifyIfExitsAccountCPF, (req, res) => {
   const { amount } = req.body
-  const { customer } = req
+  const { customer } = res
+
+  const balance = getBalance(customer.statement)
+
+  if(balance < amount) {
+    return res.status(400).json({error: 'Insufficient founds'})
+  }
+
+  const stateOperation = {
+    amount,
+    created_at: new Date(),
+    type: 'debit'
+  }
+
+  customer.statement.push(stateOperation)
+
+  return res.status(201).send()
 })
 
 app.listen(3000)
