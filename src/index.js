@@ -16,7 +16,7 @@ function verifyIfExitsAccountCPF(req, res, next) {
     return res.status(400).send({error: 'Customer not found'})
   }
 
-  res.customer = customer
+  req.customer = customer
 
   return next()
 }
@@ -52,14 +52,14 @@ app.post('/account', (req, res) => {
 })
 
 app.get('/statement', verifyIfExitsAccountCPF, (req, res) => {
- const { customer } = res
+ const { customer } = req
 
   return res.status(200).json(customer.statement)
 })
 
 app.post('/deposit', verifyIfExitsAccountCPF, (req, res) => {
   const { description, amount } = req.body
-  const { customer } = res
+  const { customer } = req
 
   const statementOperation = {
     description,
@@ -75,7 +75,7 @@ app.post('/deposit', verifyIfExitsAccountCPF, (req, res) => {
 
 app.post('/withdraw', verifyIfExitsAccountCPF, (req, res) => {
   const { amount } = req.body
-  const { customer } = res
+  const { customer } = req
 
   const balance = getBalance(customer.statement)
 
@@ -95,7 +95,7 @@ app.post('/withdraw', verifyIfExitsAccountCPF, (req, res) => {
 })
 
 app.get('/statement/date', verifyIfExitsAccountCPF, (req, res) => {
-  const { customer } = res
+  const { customer } = req
   const { date } = req.query
 
   const dateFormat = new Date(date + " 00:00");
@@ -104,7 +104,22 @@ app.get('/statement/date', verifyIfExitsAccountCPF, (req, res) => {
     return statement.created_at.toDateString() === new Date(dateFormat).toDateString()
   })
    return res.json(statement)
- })
+})
 
-app.listen(3000)
+app.put("/account", verifyIfExitsAccountCPF, (req, res) => {
+  const { name } = req.body
+  const { customer } = req
+
+  customer.name = name
+
+  return res.status(201).send()
+})
+
+app.get('/account', verifyIfExitsAccountCPF, (req, res) => {
+  const { customer } = req
+
+  return res.status(200).json(customer)
+})
+
+app.listen(3000)  
 
