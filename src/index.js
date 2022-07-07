@@ -121,5 +121,20 @@ app.get('/account', verifyIfExitsAccountCPF, (req, res) => {
   return res.status(200).json(customer)
 })
 
+app.delete('/account', verifyIfExitsAccountCPF, (req, res) => {
+  const { customer } = req
+
+  customers.splice(customer, 1)
+
+  return res.status(200).json(customers)
+})
+
+app.get('/balance', verifyIfExitsAccountCPF, (req, res) => {
+  const { customer } = req
+  const balance = getBalance(customer.statement)
+
+  return res.json(balance)
+})
+
 app.listen(3000)  
 
